@@ -1,16 +1,21 @@
 services:
   - type: web
     name: metabase
-    env: docker
-    repo: https://github.com/render-examples/metabase.git # optional
-    plan: standard # ensure that metabase has at least 2GB of RAM (defaults to starter)
-    autoDeploy: false
+    plan: free  # 512MB RAM, 0.1 CPU
     envVars:
+      - key: MB_JETTY_PORT
+        value: "3000"
+      - key: MB_JETTY_HOST
+        value: "0.0.0.0"
+      - key: JAVA_OPTS
+        value: "-Xmx350m -Xms128m -XX:+UseSerialGC"
       - key: MB_DB_CONNECTION_URI
         fromDatabase:
-          name: elephant
+          name: elephant  # Your ElephantSQL database name
           property: connectionString
-databases:
-  - name: elephant
-    databaseName: metabasedb
-    ipAllowList: [] # only allow internal connections
+      - key: MB_DISABLE_SCHEDULER
+        value: "true"
+      - key: MB_DISABLE_METRICS
+        value: "true"
+    healthCheckPath: /api/health
+    initialDelaySec: 180  # Give Metabase 3 mins to start
